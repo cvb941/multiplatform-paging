@@ -14,11 +14,11 @@ import kotlinx.coroutines.flow.Flow
 
 @FlowPreview
 @ExperimentalCoroutinesApi
-expect class Pager<K: Any, V: Any>(
+expect class Pager<K : Any, V : Any>(
     clientScope: CoroutineScope,
     config: PagingConfig,
     initialKey: K,
-    getItems: suspend (K, Int) -> PagingResult<K, V>
+    getItems: suspend GetItemsScope.(K, Int) -> PagingResult<K, V>
 ) {
     val pagingData: Flow<PagingData<V>>
 }

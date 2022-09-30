@@ -20,7 +20,7 @@ actual class Pager<K : Any, V : Any> actual constructor(
     clientScope: CoroutineScope,
     config: PagingConfig,
     initialKey: K,
-    getItems: suspend (K, Int) -> PagingResult<K, V>
+    getItems: suspend GetItemsScope.(K, Int) -> PagingResult<K, V>
 ) {
     actual val pagingData: Flow<PagingData<V>> = AndroidXPager(
         config = config,
@@ -34,7 +34,7 @@ actual class Pager<K : Any, V : Any> actual constructor(
 
     class PagingSource<K : Any, V : Any>(
         private val initialKey: K,
-        private val getItems: suspend (K, Int) -> PagingResult<K, V>
+        private val getItems: suspend GetItemsScope.(K, Int) -> PagingResult<K, V>
     ) : androidx.paging.PagingSource<K, V>() {
 
         override val jumpingSupported: Boolean
@@ -42,6 +42,8 @@ actual class Pager<K : Any, V : Any> actual constructor(
 
         override val keyReuseSupported: Boolean
             get() = true
+
+        private val getItemsScope = GetItemsScope { invalidate() }
 
         override fun getRefreshKey(state: PagingState<K, V>): K? {
             return null
@@ -57,7 +59,7 @@ actual class Pager<K : Any, V : Any> actual constructor(
         override suspend fun load(params: LoadParams<K>): LoadResult<K, V> {
             val currentKey = params.key ?: initialKey
             return try {
-                val pagingResult = getItems(currentKey, params.loadSize)
+                val pagingResult = getItems(getItemsScope, currentKey, params.loadSize)
                 LoadResult.Page(
                     data = pagingResult.items,
                     prevKey = if (currentKey == initialKey) null else pagingResult.prevKey(),

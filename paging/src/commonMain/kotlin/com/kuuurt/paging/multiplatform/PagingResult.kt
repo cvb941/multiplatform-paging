@@ -9,8 +9,8 @@ package com.kuuurt.paging.multiplatform
 data class PagingResult<K, V>(
     val items: List<V>,
     val currentKey: K,
-    val prevKey: () -> K?,
-    val nextKey: () -> K?,
+    val prevKey: K?,
+    val nextKey: K?,
     val itemsBefore: Int = COUNT_UNDEFINED,
     val itemsAfter: Int = COUNT_UNDEFINED
 ) {

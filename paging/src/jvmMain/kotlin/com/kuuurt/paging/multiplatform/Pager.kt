@@ -41,11 +41,10 @@ actual class Pager<K : Any, V : Any> actual constructor(
         private val getItems: suspend GetItemsScope.(K, Int) -> PagingResult<K, V>
     ) : CoroutineScopedPagingSource<K, V>() {
 
-        override val jumpingSupported: Boolean
-            get() = true
+        override val jumpingSupported: Boolean = true
 
-        override val keyReuseSupported: Boolean
-            get() = true
+//        override val keyReuseSupported: Boolean
+//            get() = true
 
         private val getItemsScope = GetItemsScope(this.coroutineContext) { invalidate() }
 
@@ -60,8 +59,8 @@ actual class Pager<K : Any, V : Any> actual constructor(
                 val pagingResult = getItems(getItemsScope, currentKey, params.loadSize)
                 LoadResult.Page(
                     data = pagingResult.items,
-                    prevKey = if (currentKey == initialKey) null else pagingResult.prevKey(),
-                    nextKey = if (pagingResult.items.isEmpty()) null else pagingResult.nextKey(),
+                    prevKey = pagingResult.prevKey,
+                    nextKey = pagingResult.nextKey,
                     itemsBefore = pagingResult.itemsBefore,
                     itemsAfter = pagingResult.itemsAfter,
                 )

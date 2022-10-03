@@ -61,8 +61,8 @@ actual class Pager<K : Any, V : Any> actual constructor(
             initialKey
         } else {
             when (loadDirection) {
-                LoadDirection.NEXT -> pagingResult.nextKey()
-                LoadDirection.PREVIOUS -> pagingResult.prevKey()
+                LoadDirection.NEXT -> pagingResult.nextKey
+                LoadDirection.PREVIOUS -> pagingResult.prevKey
             }
         }
 

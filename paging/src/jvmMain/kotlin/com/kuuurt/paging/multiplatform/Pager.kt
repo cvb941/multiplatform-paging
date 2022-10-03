@@ -20,6 +20,7 @@ actual class Pager<K : Any, V : Any> actual constructor(
     clientScope: CoroutineScope,
     config: PagingConfig,
     initialKey: K,
+    refreshKey: (Int) -> K?,
     getItems: suspend GetItemsScope.(K, Int) -> PagingResult<K, V>
 ) {
     actual val pagingData: Flow<PagingData<V>> = AndroidXPager(
@@ -27,6 +28,7 @@ actual class Pager<K : Any, V : Any> actual constructor(
         pagingSourceFactory = {
             PagingSource(
                 initialKey,
+                refreshKey,
                 getItems
             )
         }
@@ -34,6 +36,7 @@ actual class Pager<K : Any, V : Any> actual constructor(
 
     class PagingSource<K : Any, V : Any>(
         private val initialKey: K,
+        private val refreshKey: (Int) -> K?,
         private val getItems: suspend GetItemsScope.(K, Int) -> PagingResult<K, V>
     ) : androidx.paging.PagingSource<K, V>() {
 
@@ -46,14 +49,8 @@ actual class Pager<K : Any, V : Any> actual constructor(
         private val getItemsScope = GetItemsScope { invalidate() }
 
         override fun getRefreshKey(state: PagingState<K, V>): K? {
-            return null
-//            return state.anchorPosition?.let { position ->
-//                state.closestPageToPosition(position)?.let { page ->
-//                    page.prevKey?.let {
-//                        nextKey(page.data, it)
-//                    }
-//                }
-//            }
+            val day = ((state.anchorPosition ?: 0) - (state.config.initialLoadSize) / 2).coerceAtLeast(0)
+            return refreshKey(day)
         }
 
         override suspend fun load(params: LoadParams<K>): LoadResult<K, V> {
@@ -63,7 +60,9 @@ actual class Pager<K : Any, V : Any> actual constructor(
                 LoadResult.Page(
                     data = pagingResult.items,
                     prevKey = if (currentKey == initialKey) null else pagingResult.prevKey(),
-                    nextKey = if (pagingResult.items.isEmpty()) null else pagingResult.nextKey()
+                    nextKey = if (pagingResult.items.isEmpty()) null else pagingResult.nextKey(),
+                    itemsBefore = pagingResult.itemsBefore,
+                    itemsAfter = pagingResult.itemsAfter,
                 )
             } catch (exception: Exception) {
                 return LoadResult.Error(exception)

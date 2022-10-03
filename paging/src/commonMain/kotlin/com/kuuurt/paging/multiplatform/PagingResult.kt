@@ -11,4 +11,10 @@ data class PagingResult<K, V>(
     val currentKey: K,
     val prevKey: () -> K?,
     val nextKey: () -> K?,
-)
+    val itemsBefore: Int = COUNT_UNDEFINED,
+    val itemsAfter: Int = COUNT_UNDEFINED
+) {
+    companion object {
+        const val COUNT_UNDEFINED = Int.MIN_VALUE
+    }
+}

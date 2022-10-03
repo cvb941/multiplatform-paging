@@ -18,6 +18,7 @@ expect class Pager<K : Any, V : Any>(
     clientScope: CoroutineScope,
     config: PagingConfig,
     initialKey: K,
+    refreshKey: (Int) -> K?,
     getItems: suspend GetItemsScope.(K, Int) -> PagingResult<K, V>
 ) {
     val pagingData: Flow<PagingData<V>>

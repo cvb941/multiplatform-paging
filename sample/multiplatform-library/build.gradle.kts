@@ -59,11 +59,7 @@ kotlin {
         dependencies {
             api("io.github.kuuuurt:multiplatform-paging:$MP_PAGING_VERSION")
             implementation("io.ktor:ktor-client-core:1.6.7")
-            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$COROUTINES_VERSION") {
-                version {
-                    strictly("1.6.0-native-mt")
-                }
-            }
+            implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:$COROUTINES_VERSION")
         }
     }
 

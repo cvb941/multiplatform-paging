@@ -21,6 +21,7 @@ class PagerTests {
                 jumpThreshold = Int.MIN_VALUE
             ),
             initialKey = 1,
+            refreshKey = {},
             getItems = { currentKey, size ->
                 val items = currentKey until (currentKey + size)
                 PagingResult(

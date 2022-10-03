@@ -1,6 +1,7 @@
 package com.kuuurt.paging.multiplatform
 
 import androidx.paging.PagingState
+import com.kuuurt.paging.multiplatform.helpers.CoroutineScopedPagingSource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
@@ -38,7 +39,7 @@ actual class Pager<K : Any, V : Any> actual constructor(
         private val initialKey: K,
         private val refreshKey: (Int) -> K?,
         private val getItems: suspend GetItemsScope.(K, Int) -> PagingResult<K, V>
-    ) : androidx.paging.PagingSource<K, V>() {
+    ) : CoroutineScopedPagingSource<K, V>() {
 
         override val jumpingSupported: Boolean
             get() = true
@@ -46,11 +47,11 @@ actual class Pager<K : Any, V : Any> actual constructor(
         override val keyReuseSupported: Boolean
             get() = true
 
-        private val getItemsScope = GetItemsScope { invalidate() }
+        private val getItemsScope = GetItemsScope(this.coroutineContext) { invalidate() }
 
         override fun getRefreshKey(state: PagingState<K, V>): K? {
-            val day = ((state.anchorPosition ?: 0) - (state.config.initialLoadSize) / 2).coerceAtLeast(0)
-            return refreshKey(day)
+            val position = ((state.anchorPosition ?: 0) - (state.config.initialLoadSize) / 2).coerceAtLeast(0)
+            return refreshKey(position)
         }
 
         override suspend fun load(params: LoadParams<K>): LoadResult<K, V> {

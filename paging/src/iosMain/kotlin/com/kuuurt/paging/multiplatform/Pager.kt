@@ -1,12 +1,9 @@
 package com.kuuurt.paging.multiplatform
 
-import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.launch
 
 /**
  * Copyright 2020, Kurt Renzo Acosta, All rights reserved.
@@ -36,6 +33,8 @@ actual class Pager<K : Any, V : Any> actual constructor(
 
     private val currentPagingResult: MutableStateFlow<PagingResult<K, V>?> = MutableStateFlow(null)
 
+    private var job = SupervisorJob()
+
     init {
         loadNext()
     }
@@ -43,6 +42,8 @@ actual class Pager<K : Any, V : Any> actual constructor(
     fun refresh() {
         currentPagingResult.value = null
         _hasNextPage.value = true
+        job.cancel()
+        job = SupervisorJob()
         loadNext()
     }
 
@@ -73,6 +74,9 @@ actual class Pager<K : Any, V : Any> actual constructor(
                     PagingState.LoadingInitial
                 } else {
                     PagingState.LoadingMore
+                }
+                val getItemsScope = GetItemsScope(job) {
+                    refresh()
                 }
                 val newPagingResult = getItems(getItemsScope, key, config.pageSize)
                 _pagingData.value = _pagingData.value?.toMutableList()?.apply {
